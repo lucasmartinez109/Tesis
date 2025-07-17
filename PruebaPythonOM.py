@@ -1,31 +1,32 @@
-from OMPython import OMCSessionZMQ
+from OMPython import ModelicaSystem
+import numpy as np
 
-# Crear sesión con OMC
-omc = OMCSessionZMQ()
+def simular_tanque(stop_time):
+    # Ruta al archivo del modelo y nombre del modelo
+    ruta = r"C:\Users\juanf\OneDrive\Escritorio\Tésis\dosPozos.mo"
+    modelo = 'prueba1_no_mid_tanks'
 
-# Ruta del archivo .mo (usá doble barra invertida o r"" para que Python lo entienda)
-ruta = r"C:\Users\lucas\OneDrive\Escritorio\LUCAS\Proyecto Final Tesis\OpenModelica\dosPozos.mo"
+    # Creamos una instancia del sistema Modelica
+    mod = ModelicaSystem(ruta, modelo)
 
-# Cargar el archivo Modelica
-print("Cargando modelo...")
-resultado = omc.sendExpression(f'loadFile("{ruta}")')
-print("Archivo cargado:", resultado)
+    # Se setean las opciones de simulación con el stopTime recibido
+    opciones = [f"stopTime={stop_time}", "stepSize=0.1"]
+    mod.setSimulationOptions(opciones)
 
-# Comprobamos si se cargó correctamente
-if resultado:
-    # Consultamos los nombres de los modelos definidos en el archivo
-    modelos = omc.sendExpression("getClassNames()")
-    print("Modelos encontrados:", modelos)
-
-    # Elegimos el primero (o el que vos sepas que está en ese archivo)
-    modelo = 'prueba1_no_mid_tanks'  # podés cambiarlo si sabés el nombre exacto
+    # Se establece el nivel inicial del tanque
+    mod.setParameters(["tankFinal.level_start=0.7"])
 
     # Simulamos el modelo
-    print(f"Simulando {modelo}...")
-    simulacion = omc.sendExpression(f"simulate({modelo})")
+    mod.simulate()
 
-    print("Resultado de la simulación:")
-    print(simulacion)
+    # Obtenemos los resultados en formato numpy
+    tiempos, nivel = mod.getSolutions(["time", "tankFinal.level"])
 
-else:
-    print("No se pudo cargar el archivo.")
+    # Imprimimos los resultados
+    for t, nivel_actual in zip(tiempos, nivel):
+        print(f"Tiempo = {t:.2f} s, Nivel = {nivel_actual:.4f}")
+
+    # Devolver resultados si querés usarlos luego
+    return tiempos, nivel
+
+simular_tanque(stop_time=10.0)
