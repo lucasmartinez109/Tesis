@@ -6,11 +6,11 @@ model pozos_modelo_con_salida
   Modelica.Blocks.Sources.Sine lluvia1(f=1/100, amplitude=0.01, offset=0.01)
     annotation(Placement(transformation(extent={{-300,80},{-280,100}})));
   Modelica.Blocks.Math.Gain escalaLluvia1(k=1)
-    annotation(Placement(transformation(extent={{-270,80},{-250,100}})));
+    annotation(Placement(transformation(origin = {6, 0}, extent = {{-270, 80}, {-250, 100}})));
   Modelica.Blocks.Sources.Sine lluvia2(f=1/120, amplitude=0.008, offset=0.012)
     annotation(Placement(transformation(extent={{-300,40},{-280,60}})));
   Modelica.Blocks.Math.Gain escalaLluvia2(k=1)
-    annotation(Placement(transformation(extent={{-270,40},{-250,60}})));
+    annotation(Placement(transformation(origin = {4, 0}, extent = {{-270, 40}, {-250, 60}})));
 
   // === RECARGA ===
   Modelica.Fluid.Sources.MassFlowSource_T recarga1(
@@ -26,14 +26,14 @@ model pozos_modelo_con_salida
   // === ACUÍFEROS ===
   Modelica.Fluid.Vessels.OpenTank acuifero1(
     redeclare package Medium = Modelica.Media.Water.ConstantPropertyLiquidWater,
-    height=50, crossArea=1, level_start=30, use_portsData=true, nPorts=2,
+    height= 1000, crossArea=1, level_start= 500, use_portsData=true, nPorts=2,
     portsData={Modelica.Fluid.Vessels.BaseClasses.VesselPortsData(diameter=0.02),
                Modelica.Fluid.Vessels.BaseClasses.VesselPortsData(diameter=0.02)})
     annotation(Placement(transformation(extent={{-190,-50},{-170,-30}})));
 
   Modelica.Fluid.Vessels.OpenTank acuifero2(
     redeclare package Medium = Modelica.Media.Water.ConstantPropertyLiquidWater,
-    height=50, crossArea=1, level_start=30, use_portsData=true, nPorts=2,
+    height= 1000, crossArea=1, level_start=500, use_portsData=true, nPorts=2,
     portsData={Modelica.Fluid.Vessels.BaseClasses.VesselPortsData(diameter=0.02),
                Modelica.Fluid.Vessels.BaseClasses.VesselPortsData(diameter=0.02)})
     annotation(Placement(transformation(extent={{10,-50},{30,-30}})));
@@ -41,33 +41,38 @@ model pozos_modelo_con_salida
   // === VÁLVULAS ===
   Modelica.Fluid.Valves.ValveLinear valvula1(
     redeclare package Medium = Modelica.Media.Water.ConstantPropertyLiquidWater,
-    m_flow_nominal=0.05, dp_nominal=1000, opening=0.9)
+    m_flow_nominal=0.05, dp_nominal=1000, opening=0.2)
     annotation(Placement(transformation(extent={{-160,-20},{-140,0}})));
 
   Modelica.Fluid.Valves.ValveLinear valvula2(
     redeclare package Medium = Modelica.Media.Water.ConstantPropertyLiquidWater,
-    m_flow_nominal=0.05, dp_nominal=1000, opening=0.9)
+    m_flow_nominal=0.05, dp_nominal=1000, opening=0.1)
     annotation(Placement(transformation(extent={{40,-20},{60,0}})));
+    
+     Modelica.Fluid.Valves.ValveLinear valvula3(
+     redeclare package Medium = Modelica.Media.Water.ConstantPropertyLiquidWater,
+     dp_nominal = 1000, m_flow_nominal = 0.05, opening = 1)
+     annotation(Placement(transformation(origin = {-47, 103}, extent = {{40, -20}, {60, 0}})));
 
   // === POZOS ===
   Modelica.Fluid.Vessels.OpenTank pozo1(
     redeclare package Medium = Modelica.Media.Water.ConstantPropertyLiquidWater,
-    height=10, crossArea=2, level_start=1.1, use_portsData=true, nPorts=2,
+    height=70, crossArea=0.5, level_start= 35, use_portsData=true, nPorts=2,
     portsData={Modelica.Fluid.Vessels.BaseClasses.VesselPortsData(diameter=0.05),
                Modelica.Fluid.Vessels.BaseClasses.VesselPortsData(diameter=0.05)})
     annotation(Placement(transformation(extent={{-130,-50},{-110,-30}})));
 
   Modelica.Fluid.Vessels.OpenTank pozo2(
     redeclare package Medium = Modelica.Media.Water.ConstantPropertyLiquidWater,
-    height=10, crossArea=2, level_start=0.9, use_portsData=true, nPorts=2,
+    height=40, crossArea=0.5, level_start= 20, use_portsData=true, nPorts=2,
     portsData={Modelica.Fluid.Vessels.BaseClasses.VesselPortsData(diameter=0.05),
                Modelica.Fluid.Vessels.BaseClasses.VesselPortsData(diameter=0.05)})
     annotation(Placement(transformation(extent={{70,-50},{90,-30}})));
 
   // === CONTROL DE BOMBAS ===
-  Modelica.Blocks.Sources.Constant umbral1(k=1.0)
-    annotation(Placement(transformation(extent={{-100,50},{-80,70}})));
-  Modelica.Blocks.Sources.Constant umbral2(k=1.0)
+  Modelica.Blocks.Sources.Constant umbral1(k= 10)
+    annotation(Placement(transformation(origin = {-2, 2}, extent = {{-100, 50}, {-80, 70}})));
+  Modelica.Blocks.Sources.Constant umbral2(k= 10)
     annotation(Placement(transformation(extent={{180,50},{200,70}})));
 
   Modelica.Blocks.Logical.GreaterEqual control1
@@ -81,14 +86,14 @@ model pozos_modelo_con_salida
     annotation(Placement(transformation(extent={{190,-10},{210,10}})));
 
   Modelica.Blocks.Continuous.FirstOrder arranqueSuave1(T=5)
-    annotation(Placement(transformation(extent={{-50,-30},{-30,-10}})));
+    annotation(Placement(transformation(origin = {2, -2}, extent = {{-50, -30}, {-30, -10}})));
   Modelica.Blocks.Continuous.FirstOrder arranqueSuave2(T=5)
     annotation(Placement(transformation(extent={{210,-30},{230,-10}})));
 
   // === BOMBAS ===
   Modelica.Fluid.Machines.PrescribedPump bomba1(
     redeclare package Medium = Modelica.Media.Water.ConstantPropertyLiquidWater,
-    use_N_in=true, N_nominal=1200,
+    use_N_in=true, N_nominal= 1200,
     redeclare function flowCharacteristic=
       Modelica.Fluid.Machines.BaseClasses.PumpCharacteristics.quadraticFlow(
         V_flow_nominal={0,0.25,0.5}, head_nominal={100,60,0}))
@@ -96,7 +101,7 @@ model pozos_modelo_con_salida
 
   Modelica.Fluid.Machines.PrescribedPump bomba2(
     redeclare package Medium = Modelica.Media.Water.ConstantPropertyLiquidWater,
-    use_N_in=true, N_nominal=1200,
+    use_N_in=true, N_nominal= 1,
     redeclare function flowCharacteristic=
       Modelica.Fluid.Machines.BaseClasses.PumpCharacteristics.quadraticFlow(
         V_flow_nominal={0,0.25,0.5}, head_nominal={100,60,0}))
@@ -105,7 +110,7 @@ model pozos_modelo_con_salida
   // === TANQUE FINAL Y SALIDA ===
   Modelica.Fluid.Vessels.OpenTank tanqueFinal(
     redeclare package Medium = Modelica.Media.Water.ConstantPropertyLiquidWater,
-    height=10, crossArea=1, level_start=0.5, use_portsData=true, nPorts=3,
+    height= 1000, crossArea=1, level_start=0.5, use_portsData=true, nPorts=3,
     portsData={Modelica.Fluid.Vessels.BaseClasses.VesselPortsData(diameter=0.05),
                Modelica.Fluid.Vessels.BaseClasses.VesselPortsData(diameter=0.05),
                Modelica.Fluid.Vessels.BaseClasses.VesselPortsData(diameter=0.05)})
@@ -115,7 +120,7 @@ model pozos_modelo_con_salida
     redeclare package Medium = Modelica.Media.Water.ConstantPropertyLiquidWater,
     nPorts=1, p=system.p_ambient, use_T=true, T=system.T_ambient)
     annotation(Placement(transformation(extent={{60,30},{80,50}})));
-
+ 
 equation
   // === Conexiones lluvia y recarga ===
   connect(lluvia1.y, escalaLluvia1.u);
@@ -135,7 +140,8 @@ equation
   connect(pozo2.ports[2], bomba2.port_a);
   connect(bomba1.port_b, tanqueFinal.ports[1]);
   connect(bomba2.port_b, tanqueFinal.ports[2]);
-  connect(tanqueFinal.ports[3], salida.ports[1]);
+  connect(tanqueFinal.ports[3],valvula3.port_a);
+  connect(valvula3.port_b , salida.ports[1]);
 
   // === Control de bombas ===
   control1.u1 = pozo1.level;
