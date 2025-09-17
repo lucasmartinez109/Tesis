@@ -4,31 +4,31 @@ from haversine import haversine, Unit
 # --- 1. DATOS DE ENTRADA ---
 
 # Parámetros del acuífero (deben ser constantes para la zona de estudio)
-T = 1500  # Transmisividad del acuífero (m^2/día)
-R = 500   # Radio de influencia estimado (metros)
+T = 374  # Transmisividad del acuífero (m^2/día)
+R = 1000   # Radio de influencia estimado (metros)
 
 # Lista de pozos. Cada pozo es un diccionario con sus propiedades.
 pozos = [
     {
         "id": "Pozo A",
-        "lat": -34.8836,
-        "lon": -56.1881,
-        "Q": 4320,  # Caudal de bombeo (m^3/día) -> 50 L/s
+        "lat": -34.388,
+        "lon": -56.544,
+        "Q": 504,  # Caudal de bombeo (m^3/día)
         "rw": 0.15   # Radio del pozo (metros)
     },
     {
         "id": "Pozo B",
-        "lat": -34.8852,
-        "lon": -56.1825,
-        "Q": 3456,  # Caudal de bombeo (m^3/día) -> 40 L/s
+        "lat": -34.390,
+        "lon": -56.546,
+        "Q": 444,  # Caudal de bombeo (m^3/día)
         "rw": 0.15
     },
     {
         "id": "Pozo C",
-        "lat": -34.8801,
-        "lon": -56.1850,
-        "Q": 5184,  # Caudal de bombeo (m^3/día) -> 60 L/s
-        "rw": 0.20
+        "lat": -34.3946,
+        "lon": -56.5384,
+        "Q": 792,  # Caudal de bombeo (m^3/día)
+        "rw": 0.15
     }
 ]
 
