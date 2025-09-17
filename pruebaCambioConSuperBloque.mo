@@ -19,18 +19,18 @@ model pruebacambio
     Placement(transformation(origin = {118, 441}, extent = {{-13, -13}, {13, 13}}, rotation = 180)));
   Modelica.Blocks.Continuous.LimIntegrator TANQUE(initType = Modelica.Blocks.Types.Init.InitialOutput, k = 1, outMax = 10, outMin = 0, y_start = 3) annotation(
     Placement(transformation(origin = {42, 442}, extent = {{-10, -10}, {10, 10}}, rotation = 180)));
-  pozo pozo1(qBomba = 2, areaPozo = 3, const_recarga = 1, h_inicial = 30)  annotation(
-    Placement(transformation(origin = {-1, 197}, extent = {{-25, -25}, {25, 25}})));
   Modelica.Blocks.Sources.Constant const11(k = 40) annotation(
     Placement(transformation(origin = {-75, 83}, extent = {{-10, -10}, {10, 10}})));
-  pozo pozo2(areaPozo = 3, const_recarga = 1, h_inicial = 30, qBomba = 2) annotation(
-    Placement(transformation(origin = {-6, 108}, extent = {{-25, -25}, {25, 25}})));
   Modelica.Blocks.Math.Sum sum1(nin = 3, k = {-1, 1, 1})  annotation(
     Placement(transformation(origin = {112, 212}, extent = {{-10, -10}, {10, 10}})));
   Modelica.Blocks.Sources.Step step1(height = 1, startTime = 5)  annotation(
     Placement(transformation(origin = {-70, 208}, extent = {{-10, -10}, {10, 10}})));
   Modelica.Blocks.Sources.Step step2(height = 1, startTime = 10)  annotation(
     Placement(transformation(origin = {-76, 116}, extent = {{-10, -10}, {10, 10}})));
+  pozo pozo1 annotation(
+    Placement(transformation(origin = {16, 194}, extent = {{-20, -20}, {20, 20}})));
+  pozo pozo2 annotation(
+    Placement(transformation(origin = {12, 92}, extent = {{-20, -20}, {20, 20}})));
 equation
   connect(step.y, Qdemanda.u) annotation(
     Line(points = {{-64, 272}, {-30, 272}}, color = {0, 0, 127}));
@@ -48,22 +48,10 @@ equation
     Line(points = {{104, 442}, {54, 442}}, color = {0, 0, 127}));
   connect(TANQUE.y, CoedExp.u) annotation(
     Line(points = {{32, 442}, {-106, 442}, {-106, 416}}, color = {0, 0, 127}));
-  connect(const1.y, pozo1.h_acuifero) annotation(
-    Line(points = {{-59, 172}, {-18, 172}, {-18, 193}}, color = {0, 0, 127}));
-  connect(const11.y, pozo2.h_acuifero) annotation(
-    Line(points = {{-64, 83}, {-23, 83}, {-23, 104}}, color = {0, 0, 127}));
   connect(sum1.y, UnoSobreAt.u) annotation(
     Line(points = {{124, 212}, {166, 212}, {166, 442}, {134, 442}}, color = {0, 0, 127}));
   connect(product.y, sum1.u[1]) annotation(
     Line(points = {{56, 278}, {100, 278}, {100, 212}}, color = {0, 0, 127}));
-  connect(step2.y, pozo2.u_bomba) annotation(
-    Line(points = {{-64, 116}, {-22, 116}}, color = {0, 0, 127}));
-  connect(step1.y, pozo1.u_bomba) annotation(
-    Line(points = {{-58, 208}, {-18, 208}, {-18, 204}}, color = {0, 0, 127}));
-  connect(pozo1.u_q_bomba, sum1.u[2]) annotation(
-    Line(points = {{16, 194}, {100, 194}, {100, 212}}, color = {0, 0, 127}));
-  connect(pozo2.u_q_bomba, sum1.u[3]) annotation(
-    Line(points = {{10, 104}, {100, 104}, {100, 212}}, color = {0, 0, 127}));
   annotation(
     uses(Modelica(version = "4.0.0")),
   Diagram(coordinateSystem(extent = {{-500, -500}, {500, 500}})),
