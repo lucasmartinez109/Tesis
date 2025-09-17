@@ -58,13 +58,15 @@ for i in range(num_pozos):
             coord_i = (pozo_observado["lat"], pozo_observado["lon"])
             coord_j = (pozo_bombeando["lat"], pozo_bombeando["lon"])
             r = haversine(coord_i, coord_j, unit=Unit.METERS)
-
-        # Ecuación de Thiem para calcular el abatimiento s(r) = (Q / 2πT) * ln(R / r)
-        # s_ij es el abatimiento EN el pozo i, causado POR el pozo j
-        Qj = pozo_bombeando["Q"]
-        abatimiento_ij = (Qj / (2 * np.pi * T)) * np.log(R / r)
-        
-        matriz_abatimientos[i, j] = abatimiento_ij
+        if r > R:
+            abatimiento_ij = 0
+            matriz_abatimientos[i, j] = abatimiento_ij
+        else:
+            # Ecuación de Thiem para calcular el abatimiento s(r) = (Q / 2πT) * ln(R / r)
+            # s_ij es el abatimiento EN el pozo i, causado POR el pozo j
+            Qj = pozo_bombeando["Q"]
+            abatimiento_ij = (Qj / (2 * np.pi * T)) * np.log(R / r)
+            matriz_abatimientos[i, j] = abatimiento_ij
 
 # El abatimiento total en cada pozo es la suma de su fila correspondiente
 abatimiento_total_por_pozo = np.sum(matriz_abatimientos, axis=1)
