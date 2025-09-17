@@ -1,9 +1,15 @@
 model pozo
+  import Modelica.Constants.pi;
  
   parameter Real qBomba = 0;
-  parameter Real areaPozo = 0;
-  parameter Real const_recarga = 0;
+  parameter Real areaPozo = 2*pi*(radioP)*(radioP);
+  parameter Real const_recarga = (2*pi*T)/(log(radioInfluencia/radioP));
   parameter Real h_inicial = 0;
+  parameter Real radioP = 0;
+  parameter Real radioInfluencia = 0;
+  parameter Real latitud = 0;
+  parameter Real longitud = 0;
+  parameter Real T(unit="m2/s") = 4.329e-3 "Transmisividad";
   
   Modelica.Blocks.Logical.Switch Selector annotation(
     Placement(transformation(origin = {-36, 146}, extent = {{-10, -10}, {10, 10}})));
