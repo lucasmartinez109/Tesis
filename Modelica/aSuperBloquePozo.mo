@@ -2,11 +2,9 @@ model pozo
   import Modelica.Constants.pi;
  
   parameter Real qBomba = 0;
-  parameter Real areaPozo = 2*pi*(radioP)*(radioP);
-  parameter Real const_recarga = (2*pi*T)/(log(radioInfluencia/radioP));
   parameter Real h_inicial = 0;
-  parameter Real radioP = 0;
-  parameter Real radioInfluencia = 0;
+  parameter Real radioP(unit="m") = 1 "Radio del pozo";
+  parameter Real radioInfluencia = 500;
   parameter Real latitud = 0;
   parameter Real longitud = 0;
   parameter Real T(unit="m2/s") = 4.329e-3 "Transmisividad";
@@ -15,17 +13,17 @@ model pozo
     Placement(transformation(origin = {-36, 146}, extent = {{-10, -10}, {10, 10}})));
   Modelica.Blocks.Sources.Constant const(k = 0) annotation(
     Placement(transformation(origin = {-154, 122}, extent = {{-10, -10}, {10, 10}})));
-  Modelica.Blocks.Logical.Hysteresis hysteresis annotation(
+  Modelica.Blocks.Logical.Hysteresis hysteresis(uLow = 1, uHigh = 2)  annotation(
     Placement(transformation(origin = {-72, 84}, extent = {{-10, -10}, {10, 10}})));
   Modelica.Blocks.Math.Add add(k2 = -1) annotation(
     Placement(transformation(origin = {-92, -24}, extent = {{-10, -10}, {10, 10}})));
   Modelica.Blocks.Math.Sqrt sqrt1 annotation(
     Placement(transformation(origin = {-32, -24}, extent = {{-10, -10}, {10, 10}})));
-  Modelica.Blocks.Math.Gain Recarga(k = const_recarga) annotation(
+  Modelica.Blocks.Math.Gain Recarga(k = (2*pi*T)/(log(radioInfluencia/radioP))) annotation(
     Placement(transformation(origin = {40, -24}, extent = {{-10, -10}, {10, 10}})));
   Modelica.Blocks.Math.Add add1(k1 = -1) annotation(
     Placement(transformation(origin = {102, -18}, extent = {{-10, -10}, {10, 10}})));
-  Modelica.Blocks.Math.Gain invAP(k = 1/areaPozo) annotation(
+  Modelica.Blocks.Math.Gain invAP(k = 1/(2*pi*(radioP)*(radioP))) annotation(
     Placement(transformation(origin = {82, -86}, extent = {{-10, -10}, {10, 10}}, rotation = 180)));
   Modelica.Blocks.Math.Gain K1(k = qBomba) annotation(
     Placement(transformation(origin = {72, 71}, extent = {{-10, -10}, {10, 10}}, rotation = -90)));
@@ -34,7 +32,7 @@ model pozo
   Modelica.Blocks.Interfaces.RealInput h_acuifero annotation(
     Placement(transformation(origin = {-180, -18}, extent = {{-20, -20}, {20, 20}}), iconTransformation(origin = {-134, -30}, extent = {{-20, -20}, {20, 20}})));
   Modelica.Blocks.Interfaces.RealOutput u_q_bomba annotation(
-    Placement(transformation(origin = {196, 61}, extent = {{-21, -21}, {21, 21}}), iconTransformation(origin = {130, -30}, extent = {{-20, -20}, {20, 20}})));
+    Placement(transformation(origin = {194, 63}, extent = {{-21, -21}, {21, 21}}), iconTransformation(origin = {130, -30}, extent = {{-20, -20}, {20, 20}})));
  Modelica.Blocks.Interfaces.RealInput u_bomba annotation(
     Placement(transformation(origin = {-179, 150}, extent = {{-20, -20}, {20, 20}}), iconTransformation(origin = {-134, 58}, extent = {{-20, -20}, {20, 20}})));
  Modelica.Blocks.Interfaces.RealOutput h_pozo annotation(
@@ -65,7 +63,7 @@ equation
   connect(add.u1, h_acuifero) annotation(
     Line(points = {{-104, -18}, {-180, -18}}, color = {0, 0, 127}));
   connect(K1.y, u_q_bomba) annotation(
-    Line(points = {{72, 60}, {122, 60}, {122, 61}, {196, 61}}, color = {0, 0, 127}));
+    Line(points = {{72, 60}, {122, 60}, {122, 63}, {194, 63}}, color = {0, 0, 127}));
  connect(u_bomba, Selector.u1) annotation(
     Line(points = {{-178, 150}, {-48, 150}, {-48, 154}}, color = {0, 0, 127}));
  connect(limIntegrator.y, h_pozo) annotation(
