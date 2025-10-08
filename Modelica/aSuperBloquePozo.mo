@@ -1,7 +1,7 @@
 model pozo
   import Modelica.Constants.pi;
  
-  parameter Real qBomba = 0;
+  parameter Real qBomba = 0 "[m3/día]";
   parameter Real h_inicial = 0;
   parameter Real radioP(unit="m") = 1 "Radio del pozo";
   parameter Real radioInfluencia = 500;
@@ -17,10 +17,8 @@ model pozo
     Placement(transformation(origin = {-72, 84}, extent = {{-10, -10}, {10, 10}})));
   Modelica.Blocks.Math.Add add(k2 = -1) annotation(
     Placement(transformation(origin = {-92, -24}, extent = {{-10, -10}, {10, 10}})));
-  Modelica.Blocks.Math.Sqrt sqrt1 annotation(
-    Placement(transformation(origin = {-32, -24}, extent = {{-10, -10}, {10, 10}})));
   Modelica.Blocks.Math.Gain Recarga(k = (2*pi*T)/(log(radioInfluencia/radioP))) annotation(
-    Placement(transformation(origin = {40, -24}, extent = {{-10, -10}, {10, 10}})));
+    Placement(transformation(origin = {58, -24}, extent = {{-10, -10}, {10, 10}})));
   Modelica.Blocks.Math.Add add1(k1 = -1) annotation(
     Placement(transformation(origin = {102, -18}, extent = {{-10, -10}, {10, 10}})));
   Modelica.Blocks.Math.Gain invAP(k = 1/(2*pi*(radioP)*(radioP))) annotation(
@@ -37,6 +35,8 @@ model pozo
     Placement(transformation(origin = {-179, 150}, extent = {{-20, -20}, {20, 20}}), iconTransformation(origin = {-134, 58}, extent = {{-20, -20}, {20, 20}})));
  Modelica.Blocks.Interfaces.RealOutput h_pozo annotation(
     Placement(transformation(origin = {204, -19}, extent = {{-21, -21}, {21, 21}}), iconTransformation(origin = {130, 58}, extent = {{-20, -20}, {20, 20}})));
+ Modelica.Blocks.Math.Log10 log10 annotation(
+    Placement(transformation(origin = {-34, -24}, extent = {{-10, -10}, {10, 10}})));
 equation
   connect(hysteresis.y, Selector.u2) annotation(
     Line(points = {{-61, 84}, {-57, 84}, {-57, 146}, {-49, 146}}, color = {255, 0, 255}));
@@ -44,30 +44,30 @@ equation
     Line(points = {{-143, 122}, {-65, 122}, {-65, 138}, {-49, 138}}, color = {0, 0, 127}));
   connect(Selector.y, K1.u) annotation(
     Line(points = {{-25, 146}, {71, 146}, {71, 84}}, color = {0, 0, 127}));
-  connect(add.y, sqrt1.u) annotation(
-    Line(points = {{-81, -24}, {-45, -24}}, color = {0, 0, 127}));
-  connect(sqrt1.y, Recarga.u) annotation(
-    Line(points = {{-21, -24}, {27, -24}}, color = {0, 0, 127}));
   connect(Recarga.y, add1.u2) annotation(
-    Line(points = {{51, -24}, {89, -24}}, color = {0, 0, 127}));
+    Line(points = {{69, -24}, {89, -24}}, color = {0, 0, 127}));
   connect(K1.y, add1.u1) annotation(
     Line(points = {{72, 60}, {72, -12}, {90, -12}}, color = {0, 0, 127}));
   connect(add1.y, invAP.u) annotation(
     Line(points = {{113, -18}, {123, -18}, {123, -86}, {93, -86}}, color = {0, 0, 127}));
   connect(invAP.y, limIntegrator.u) annotation(
     Line(points = {{71, -86}, {31, -86}, {31, -50}, {17, -50}}, color = {0, 0, 127}));
-  connect(limIntegrator.y, add.u2) annotation(
-    Line(points = {{-5, -50}, {-117, -50}, {-117, -30}, {-105, -30}}, color = {0, 0, 127}));
   connect(limIntegrator.y, hysteresis.u) annotation(
     Line(points = {{-5, -50}, {-123, -50}, {-123, 84}, {-85, 84}}, color = {0, 0, 127}));
-  connect(add.u1, h_acuifero) annotation(
-    Line(points = {{-104, -18}, {-180, -18}}, color = {0, 0, 127}));
   connect(K1.y, u_q_bomba) annotation(
     Line(points = {{72, 60}, {122, 60}, {122, 63}, {194, 63}}, color = {0, 0, 127}));
- connect(u_bomba, Selector.u1) annotation(
+  connect(u_bomba, Selector.u1) annotation(
     Line(points = {{-178, 150}, {-48, 150}, {-48, 154}}, color = {0, 0, 127}));
- connect(limIntegrator.y, h_pozo) annotation(
+  connect(limIntegrator.y, h_pozo) annotation(
     Line(points = {{-4, -50}, {-28, -50}, {-28, -118}, {170, -118}, {170, -18}, {204, -18}}, color = {0, 0, 127}));
+  connect(h_acuifero, add.u1) annotation(
+    Line(points = {{-180, -18}, {-104, -18}}, color = {0, 0, 127}));
+  connect(limIntegrator.y, add.u2) annotation(
+    Line(points = {{-4, -50}, {-104, -50}, {-104, -30}}, color = {0, 0, 127}));
+ connect(add.y, log10.u) annotation(
+    Line(points = {{-80, -24}, {-46, -24}}, color = {0, 0, 127}));
+ connect(log10.y, Recarga.u) annotation(
+    Line(points = {{-22, -24}, {46, -24}}, color = {0, 0, 127}));
   annotation(
     Diagram(coordinateSystem(extent = {{-200, -200}, {200, 200}})),
     Icon(coordinateSystem(extent = {{-200, -200}, {200, 200}})),
