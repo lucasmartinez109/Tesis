@@ -175,8 +175,8 @@ def build_mpc(model, h, hT, t_on, t_on_acum, u, R, Qdem, Ce):
     # 4) Tiempo encendida (continua)
     C_on_time = SX(0)
     for i in range(n_p):
-        C_on_time += t_on[i]
-    C_on_time = lambda_on_time * pos_sq(C_on_time-8.0)
+        C_on_time += pos_sq(t_on[i]-8.0)
+    C_on_time = lambda_on_time * C_on_time
 
     # 5) Anti-0.5
     C_binario = SX(0)
