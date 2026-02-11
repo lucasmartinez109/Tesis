@@ -1,0 +1,27 @@
+mqtt:
+  host: "192.168.125.242"
+  port: 1883
+
+topics:
+  sensor: "pozos/pozo1/sensores/altura_m"
+  command: "pozos/pozo1/comandos/bomba"
+
+runtime:
+  Ts: 60.0          # período de control [s]
+  eps_on: 0.5       # umbral MPC → ON/OFF
+
+mapping:
+  sensor_to_state: "h_0"    # usar "hT_0" si el sensor es del tanque
+
+mpc:
+  x0:
+    h_0: 10.0
+    h_1: 8.0
+    h_2: 9.0
+    hT_0: 5.0
+    t_on_0: 0.0
+    t_on_1: 0.0
+    t_on_2: 0.0
+    t_on_acum_0: 0.0
+    t_on_acum_1: 0.0
+    t_on_acum_2: 0.0
