@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 
+from xml.parsers.expat import model
 import numpy as np
 import pandas as pd
 import do_mpc
 from casadi import *
+
 
 # =========================
 # Configuración global (mismos valores que en mpc_dos_en_uno.py)
@@ -15,22 +17,22 @@ n_p = 3
 n_t = 1
 
 # Parámetros del modelo
-ha = [40, 30, 60]
-Rp = [0.3, 0.3, 0.2]          # m radio de los pozos
-Rt = [4]                      # radio de los tanques
-hs = [1.0, 1.0, 1.0]          # altura mínima de succión (no usado en el modelo actual, se mantiene)
+ha = [40, 30, 60] # nivel estático de agua en el acuífero
+Rp = [0.3, 0.3, 0.2] # m radio de los pozos
+Rt = [4] # radio de los tanques
+hs = [1.0, 1.0, 1.0] # altura mínima de succión (no usado en el modelo actual, se mantiene)
 T = 15.58/4
-alpha = [0.05, 0.05, 0.05]    # sensibilidad a la lluvia
-q = [27, 36, 42]              # caudal máximo de bombeo m3/h
+alpha = [0.05, 0.05, 0.05] # sensibilidad a la lluvia
+q = [27, 36, 42] # caudal máximo de bombeo m3/h
+
 
 # Pesos
-lambda_dem    = 12            # peso nivel mínimo de tanque
+lambda_dem    = 14            # peso nivel mínimo de tanque
 lambda_pozo   = 0.1          # peso nivel mínimo de pozo
-lambda_on_time = 0.6         # escala
-lambda_bin    = 25           # anti-0.5
-lambda_energy = 0.9
-lambda_wear   = 0.07
-lambda_num    = 2.0
+lambda_on_time = 1         # escala
+lambda_bin    = 800           # anti-0.5
+lambda_energy = 2
+lambda_wear   = 2
 
 # Referencias
 hT_ref = [10.0 for _ in range(n_t)]
@@ -45,7 +47,7 @@ setup_mpc = {
 }
 
 # rterm
-r_u = 45
+r_u = 300
 
 # Bounds
 h_min = [0.0]*n_p
@@ -58,9 +60,9 @@ u_min = [0.0]*n_p
 u_max = [1, 1, 1]
 
 # TVP: demanda y lluvia
-QDEM_MIN = 5.0
-QDEM_MAX = 90.0
-T_HOLD   = 1.5  # horas
+QDEM_MIN = 5
+QDEM_MAX = 110
+T_HOLD   = 3  # horas
 
 # =========================
 # Utilidades
@@ -76,8 +78,9 @@ def _to_scalar(t):
         return float(np.array(t).squeeze())
 
 def Qdem_forecast(t, j=0):
-    k = int(np.floor(float(t) / T_HOLD))
-    r = np.random.default_rng(seed=1000 + 37*j + k).uniform(QDEM_MIN, QDEM_MAX)
+    t = _to_scalar(t)
+    k = int(np.floor(t / T_HOLD))
+    r = np.random.default_rng(seed=22 + 37*j + k).uniform(QDEM_MIN, QDEM_MAX)
     return float(r)
 
 def rain_forecast(t):
@@ -85,9 +88,9 @@ def rain_forecast(t):
 
 def ute_tariff(t):
     t = _to_scalar(t)
-    if 0 <= t < 7:
+    if 0 <= t < 7 or 24 <= t < 31:
         return 2.6   # valle
-    elif 7 <= t < 18 or 22 <= t < 24:
+    elif 7 <= t < 18 or 22 <= t < 24 or 31 <= t < 42 or 46 <= t < 48:
         return 5.8   # llano
     else:
         return 13.2   # punta
@@ -135,9 +138,11 @@ def build_model():
         model.set_rhs(f'hT_{j}', dhT_dt)
 
     # t_on: tiempo continuo encendida (misma dinámica original)
-    u_eps = 1e-3
+    k = 10  # pendiente de la sigmoide (ajustable)
     for i in range(n_p):
-        t_on_dot = if_else(u[i] > u_eps, 1, -0.8 * (t_on[i]))
+        
+        sigma = 1 / (1 + exp(-k * (u[i] - 0.5)))
+        t_on_dot = sigma * 1 + (1 - sigma) * (-0.8 * t_on[i])
         model.set_rhs(f't_on_{i}', t_on_dot)
 
     # t_on_acum: acumulado (misma dinámica original)
@@ -163,19 +168,19 @@ def build_mpc(model, h, hT, t_on, t_on_acum, u, R, Qdem, Ce):
     # 2) Demanda / tanque bajo
     tank_pen = SX(0)
     for j in range(n_t):
-        tank_pen += pos_sq(hT_ref[j] - hT[j])
+        tank_pen += (hT_ref[j] - hT[j])**2
     C_dem = lambda_dem * tank_pen
 
     # 3) Pozo bajo
     well_pen = SX(0)
     for i in range(n_p):
-        well_pen += pos_sq(h_ref[i] - h[i])
+        well_pen += (h_ref[i] - h[i])**2
     C_pozo = lambda_pozo * well_pen
 
     # 4) Tiempo encendida (continua)
     C_on_time = SX(0)
     for i in range(n_p):
-        C_on_time += pos_sq(t_on[i]-8.0)
+        C_on_time += (t_on[i])**2
     C_on_time = lambda_on_time * C_on_time
 
     # 5) Anti-0.5
@@ -188,13 +193,7 @@ def build_mpc(model, h, hT, t_on, t_on_acum, u, R, Qdem, Ce):
     t_mean = sum1(t_vec)/n_p
     C_wear = lambda_wear * sum1((t_vec - t_mean)**2)
 
-    # 7) Número de bombas
-    C_num_pumps = SX(0)
-    for i in range(n_p):
-        C_num_pumps += u[i]
-    C_num_pumps = (C_num_pumps**2)*lambda_num
-
-    lterm = C_energy + C_dem + C_pozo + C_on_time + C_binario + C_wear + C_num_pumps
+    lterm = C_energy + C_dem + C_pozo + C_binario + C_wear + C_on_time
 
     # Terminal term (igual, 0)
     mterm = SX(0)
@@ -385,7 +384,7 @@ def init_state(simulator):
     return x0
 
 
-def run_closed_loop(mpc, simulator, x0, sim_steps=480):
+def run_closed_loop(mpc, simulator, x0, sim_steps):
     simulator.reset_history()
     simulator.x0 = x0
     mpc.reset_history()
