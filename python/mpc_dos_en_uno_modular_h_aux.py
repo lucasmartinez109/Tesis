@@ -25,7 +25,6 @@ T = 15.58/4 # transmisividad del acuífero (m2/h)
 alpha = [0.05, 0.05, 0.05] # sensibilidad a la lluvia
 q = [27, 36, 42] # caudal máximo de bombeo m3/h
 
-
 # Pesos
 lambda_dem    = 16            # peso nivel mínimo de tanque
 lambda_pozo   = 0.1          # peso nivel mínimo de pozo
@@ -131,11 +130,7 @@ def build_model():
 
     # Dinámica de pozos aux
     for i in range(n_p):
-        # Qin_i  = 2*pi*T*log(fmax(ha[i] - h[i], 1e-3))/log(2) + alpha[i]*R
-        Qin_i  = T*(ha[i] - haux[i])
-        Qout[i] = u[i]*q[i]
-        dhaux_dt  = (Qin_i - Qout[i]) / (20*pi*(Rp[i]**2))
-        model.set_rhs(f'haux_{i}', dhaux_dt)
+        model.set_rhs(f'haux_{i}', (h[i] - haux[i]))
 
     # Dinámica de tanque
     for j in range(n_t):
